@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko" class="is-hero-open">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>wooss2 · 메인</title>
+
+  <!-- SEO / OG -->
+  <meta name="description" content="CP10 · wooss2 메인 페이지">
+  <meta property="og:title" content="wooss2 · 메인">
+  <meta property="og:description" content="케어 토글, 히어로 1·2·3, 프로모션 카드">
+  <meta property="og:type" content="website">
+
+  <!-- Drop-in 패키지와 연결 (루트 기준) -->
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="logo left">
+      <!-- 실제 로고 이미지로 교체 가능 -->
+      <img src="/assets/hero/logo-left.svg" alt="Left Logo">
+    </div>
+    <div class="search">
+      <input type="text" placeholder="게임, 스튜디오, 카테고리 검색">
+    </div>
+    <div class="logo right">
+      <img src="/assets/hero/logo-right.svg" alt="Right Logo">
+    </div>
+  </header>
+
+  <!-- 상단 툴바 -->
+  <nav class="toolbar" style="display:flex;align-items:center;gap:12px;padding:12px var(--side);">
+    <button id="careToggle" class="btn-care">케어</button>
+    <span class="hint" style="opacity:.6;font-size:14px">케어 클릭 시 히어로 1·2·3 펼침/접힘 (상태 저장)</span>
+  </nav>
+
+  <!-- 히어로 1·2·3 -->
+  <section id="heroWrap" style="padding:0 var(--side);">
+    <div class="hero">
+      <div class="hero-inner">Hero 1</div>
+    </div>
+    <div class="hero">
+      <div class="hero-inner">Hero 2</div>
+    </div>
+    <div class="hero">
+      <div class="hero-inner">Hero 3</div>
+    </div>
+  </section>
+
+  <!-- 카드 섹션 -->
+  <section id="cardSection" class="cards">
+    <div class="card tall yellow-box">
+      <h3>퀴즈만점! 쿠폰만점!</h3>
+      <!-- 확장자 자동 감지 (.png → .jpg → .jpeg → .webp) -->
+      <img class="auto-ext" data-src-base="/assets/promo/quiz-coupon" alt="퀴즈만점! 쿠폰만점!">
+    </div>
+
+    <div class="card">
+      <div class="card-inner">공식 프로모션</div>
+    </div>
+    <div class="card">
+      <div class="card-inner">파트너 프로모션</div>
+    </div>
+    <div class="card">
+      <div class="card-inner">지금 진행중</div>
+    </div>
+    <div class="card">
+      <div class="card-inner">프로모션 참여</div>
+    </div>
+  </section>
+
+  <!-- 스크립트 -->
+  <script src="/js/main.js"></script>
+</body>
+</html>
