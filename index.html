@@ -1,76 +1,328 @@
 <!doctype html>
-<html lang="ko" class="is-hero-open">
+<html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>wooss2 · 메인</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WOOSS2 · 케어=히어로(860×460) 푸시다운</title>
+<style>
+  /* ===== Design Tokens (WOOSS2 톤) ===== */
+  :root{
+    --bg:#0b0e13; --bg2:#0a0d12;
+    --panel-1:rgba(255,255,255,.06); --panel-2:rgba(255,255,255,.03);
+    --stroke:rgba(255,255,255,.08); --txt:#eaf0f6; --muted:#b9c4cf;
+    --radius:10px; --shadow:0 12px 32px rgba(0,0,0,.55);
+    --acc-ease:cubic-bezier(.22,.61,.36,1);
+    --care-speed:.72s;       /* 카드 모션 속도 (느리게) */
+    --row-speed:2.4s;        /* 행 높이 전개/수축 속도 */
+    --seq-gap:.72s;          /* 카드 간 지연 */
+    --hero-aspect:86/46;     /* 860×460 비율 고정 */
 
-  <!-- SEO / OG -->
-  <meta name="description" content="CP10 · wooss2 메인 페이지">
-  <meta property="og:title" content="wooss2 · 메인">
-  <meta property="og:description" content="케어 토글, 히어로 1·2·3, 프로모션 카드">
-  <meta property="og:type" content="website">
+    /* Left Category tokens */
+    --label:#ffffff; --label-hover:#ffffff; --label-active:#ffffff;
+    --group-max: 460px;      /* 아코디언 펼침 최대 높이 */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#11161c,#090c10);color:var(--txt);font-family:"Pretendard",system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif}
 
-  <!-- Drop-in 패키지와 연결 (루트 기준) -->
-  <link rel="stylesheet" href="/css/styles.css">
+  /* ===== Layout ===== */
+  .wrap{max-width:95vw;margin:0 auto;padding:0 2.5vw}
+  .grid{display:grid;grid-template-columns:280px 1fr;gap:18px;margin-top:18px}
+  .panel{background:linear-gradient(180deg,var(--panel-1),var(--panel-2));border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* ===== Left Category (WOOSS2 동일 감성) ===== */
+  .left{padding:10px}
+  .group{margin-bottom:12px;border-radius:12px}
+  .group-hd{height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px;border-radius:12px;border:1px solid var(--stroke);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));font-weight:800;color:var(--label);width:100%;text-align:left;cursor:pointer;position:relative;transition:filter .16s ease,transform .08s ease}
+  .group-hd:hover{filter:brightness(1.06)}
+  .group-hd:active{transform:translateY(1px)}
+  .group-hd .chev{transition:transform 3.12s cubic-bezier(.16,1,.3,1);opacity:.85}
+  .group.open .group-hd{color:var(--label-active)}
+  .group.open .group-hd .chev{transform:rotate(90deg)}
+
+  /* 더 부드러운 아코디언: 페이드 제거, 높이만 부드럽게 */
+  .group-body{max-height:0;overflow:hidden;transition:max-height 3.12s cubic-bezier(.16,1,.3,1);padding:0 10px}
+  .group.open .group-body{max-height:var(--group-max)}
+
+  /* 아이템: 좌우 끝선 정렬(헤더 패딩과 동일), 더 부드러운 슬라이드 */
+  .item{height:36px;display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;margin:6px 0;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));padding:0 10px;cursor:pointer;position:relative;transition:transform .12s ease,box-shadow .16s ease,filter .16s ease;will-change:transform}
+  .item:hover{transform:translateY(-1px);filter:brightness(1.06);box-shadow:0 6px 12px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06)}
+  .item:active{transform:translateY(0)}
+  .item .lbl{transition:transform .18s cubic-bezier(.2,.8,.2,1), color .15s ease;color:var(--label)}
+  .item:hover .lbl{transform:translateX(2px);color:var(--label-hover)}
+  .item.active .lbl{color:var(--label-active)}
+  .dot{width:7px;height:7px;border-radius:999px;background:radial-gradient(circle,#ffd476 0%,#ffc23d 60%,#ff9f1a 100%);box-shadow:0 0 8px rgba(255,194,61,.45);transition:filter .16s ease, transform .16s ease}
+  .item:hover .dot{filter:brightness(1.15);transform:scale(1.08)}
+  .pill{width:8px;height:6px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.4),rgba(255,255,255,.12));opacity:.2;transition:width .24s var(--acc-ease),opacity .16s ease}
+  .item:hover .pill{width:34px;opacity:.9}
+  .item.active{background:linear-gradient(180deg, rgba(74,205,255,.16), rgba(74,205,255,.04));box-shadow:inset 0 0 0 1px rgba(74,205,255,.35),0 8px 16px rgba(74,205,255,.08)}
+
+  /* 카테고리: 페이드 없이 순차 슬라이드(더 부드럽게) */
+  .group-body .item{transform:translateY(-14px)}
+  .group.open .group-body .item{transform:translateY(0);transition:transform 1s cubic-bezier(.16,1,.3,1)}
+  .group.open .group-body .item:nth-child(1){transition-delay:0s}
+  .group.open .group-body .item:nth-child(2){transition-delay:.14s}
+  .group.open .group-body .item:nth-child(3){transition-delay:.28s}
+  .group.open .group-body .item:nth-child(4){transition-delay:.42s}
+  .group.open .group-body .item:nth-child(5){transition-delay:.56s}
+  .group.open .group-body .item:nth-child(6){transition-delay:.70s}
+
+  /* Ripple 효과 */
+  [data-ripple]{position:relative;overflow:hidden}
+  .wave{position:absolute;pointer-events:none;width:10px;height:10px;border-radius:50%;transform:translate(-50%,-50%) scale(1);background:radial-gradient(circle,rgba(255,255,255,.45),rgba(255,255,255,0) 70%);animation:ripple .48s ease-out forwards}
+  @keyframes ripple{from{opacity:.7;transform:translate(-50%,-50%) scale(1)}to{opacity:0;transform:translate(-50%,-50%) scale(16)}}
+
+  /* ===== Center: Hero row pushes content ===== */
+  .center{position:relative;padding:14px}
+  .hero-row{overflow:hidden;height:0;will-change:height;transition:height var(--row-speed) var(--acc-ease)}
+  .open .hero-row{height:var(--hero-open-h)}
+  .hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .hero-card .img{width:100%;height:100%;background-size:cover;background-position:center;border-radius:inherit}
+  .hero-card{aspect-ratio:var(--hero-aspect);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#0b0e13;box-shadow:0 8px 20px rgba(0,0,0,.35);position:relative;backface-visibility:hidden;will-change:transform;transform:translate3d(0,-110%,0);transition:transform var(--care-speed) cubic-bezier(.22,1,.36,1)}
+  .open .hero-card{transform:translate3d(0,0,0)}
+  .open .hero-card:nth-child(1){transition-delay:0s}
+  .open .hero-card:nth-child(2){transition-delay:var(--seq-gap)}
+  .open .hero-card:nth-child(3){transition-delay:calc(var(--seq-gap)*2)}
+  /* 경량 Glow + Sweep (GPU 친화) */
+  .hero-card::before{content:"";position:absolute;inset:-14% -14% -24% -14%;background:radial-gradient(55% 40% at 50% 120%,rgba(130,234,255,.22),transparent 60%);opacity:0;pointer-events:none;mix-blend-mode:screen;transition:opacity 1.2s ease}
+  .open .hero-card::before{opacity:.28;animation:pulse 3.6s ease-in-out infinite}
+  .hero-card::after{content:"";position:absolute;top:-20%;bottom:-20%;left:-40%;width:40%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));transform:translate3d(-120%,0,0) rotate(14deg);opacity:0}
+  .open .hero-card::after{opacity:.35;animation:sweep 4.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.18}50%{opacity:.36}}
+  @keyframes sweep{from{transform:translate3d(-120%,0,0) rotate(14deg)}to{transform:translate3d(180%,0,0) rotate(14deg)}}
+
+  /* 아래 컨텐츠(빨간박스 자리) */
+  .content{margin-top:12px;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));min-height:420px}
+  /* Center sections (페이지 전환) */
+  .content-section{display:none;padding:16px 14px}
+  .content-section.active{display:block}
+  .content-section h2{margin:4px 0 10px;font-size:20px;font-weight:900;color:#fff}
+  .content-section p, .content-section li{color:#dbe6f3;line-height:1.55}
+  .content-section .note{font-size:13px;color:#b9c4cf;opacity:.9}
+  /* ===== Click flash border ===== */
+  [data-flash]{position:relative}
+  .flash-border::before{content:"";position:absolute;inset:-2px;border-radius:inherit;border:2px solid rgba(180,250,255,0);box-shadow:0 0 0 0 rgba(180,250,255,0);pointer-events:none;animation:borderFlash 1.2s cubic-bezier(.22,.61,.36,1)}
+  @keyframes borderFlash{0%{opacity:0;border-color:rgba(180,250,255,0);box-shadow:0 0 0 0 rgba(180,250,255,0)}20%{opacity:1;border-color:rgba(180,250,255,.95);box-shadow:0 0 22px 5px rgba(180,250,255,.7),0 0 1px 1px rgba(180,250,255,.95)}60%{opacity:1;border-color:rgba(160,240,255,.55);box-shadow:0 0 30px 9px rgba(160,240,255,.45),0 0 0 2px rgba(160,240,255,.55)}100%{opacity:0;border-color:rgba(180,250,255,0);box-shadow:0 0 0 0 rgba(180,250,255,0)}}
+  .flash-blink::before{content:"";position:absolute;inset:-2px;border-radius:inherit;border:2px solid rgba(180,250,255,0);pointer-events:none;animation:flashBlink 3s ease-in-out 1 forwards}
+  @keyframes flashBlink{
+    0%,100%{opacity:0;border-color:rgba(180,250,255,0);box-shadow:0 0 0 0 rgba(180,250,255,0)}
+    10%,30%,50%,70%,90%{opacity:1;border-color:rgba(180,250,255,.95);box-shadow:0 0 24px 6px rgba(180,250,255,.66),0 0 1px 1px rgba(180,250,255,.95)}
+    20%,40%,60%,80%{opacity:.15;border-color:rgba(180,250,255,.2);box-shadow:0 0 6px 1px rgba(180,250,255,.25)}
+  }
+  /* 프로모션 업로더/리스트 */
+  .promo-uploader{display:none;grid-template-columns:1fr 2fr auto;gap:10px;align-items:start;margin:8px 0 14px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03))}
+  .admin .promo-uploader{display:grid}
+  .promo-uploader input[type=file]{width:100%}
+  .promo-uploader textarea{width:100%;resize:vertical;min-height:38px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.25);color:#fff;padding:8px}
+  .promo-add-btn{height:38px;padding:0 14px;border-radius:9px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#fff;cursor:pointer}
+  .promo-add-btn:hover{filter:brightness(1.06)}
+  .promo-list{display:grid;grid-template-columns:1fr;gap:10px}
+  .promo-item{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:center;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02))}
+  .promo-item .thumb{width:100%;aspect-ratio:16/10;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#0b0e13}
+  .promo-item .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .promo-item .meta{color:#b9c4cf;font-size:12px;opacity:.9;margin-top:2px}
+  .promo-item .desc{color:#eaf0f6;white-space:pre-line}
+</style>
 </head>
 <body>
-  <!-- 헤더 -->
-  <header class="header">
-    <div class="logo left">
-      <!-- 실제 로고 이미지로 교체 가능 -->
-      <img src="/assets/hero/logo-left.svg" alt="Left Logo">
-    </div>
-    <div class="search">
-      <input type="text" placeholder="게임, 스튜디오, 카테고리 검색">
-    </div>
-    <div class="logo right">
-      <img src="/assets/hero/logo-right.svg" alt="Right Logo">
-    </div>
-  </header>
+<div class="wrap">
+  <main class="grid">
+    <aside class="panel left" id="leftNav">
+      <button class="care-toggle" id="careBtn" data-flash data-ripple style="display:block;width:100%;margin-bottom:10px;">케어 ▾</button>
+      <div class="group open">
+        <button class="group-hd" data-flash data-ripple>
+          <span class="ttl">카테고리</span><span class="chev">›</span>
+        </button>
+        <div class="group-body">
+          <button class="item" data-flash data-ripple data-target="sec-partner-service"><span class="dot"></span><span class="lbl">🎫 파트너서비스</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-benefits"><span class="dot"></span><span class="lbl">🧾 등급별 혜택</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-partner-greeting"><span class="dot"></span><span class="lbl">🎲 파트너인사</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-contact"><span class="dot"></span><span class="lbl">🧩 문의하기</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-inquiry"><span class="dot"></span><span class="lbl">🧩 문의</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-preference"><span class="dot"></span><span class="lbl">⭐ 선호도체크</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-quiz-coupon"><span class="dot"></span><span class="lbl">🏛️ 퀴즈풀고쿠폰받기</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-coupon-apply"><span class="dot"></span><span class="lbl">✨ 쿠폰신청하기</span><span class="pill"></span></button>
+        </div>
+      </div>
+      <div class="group">
+        <button class="group-hd" data-flash data-ripple>
+          <span class="ttl">💸쿠폰💸</span><span class="chev">›</span>
+        </button>
+        <div class="group-body">
+          <button class="item" data-flash data-ripple data-target="sec-coupon-new"><span class="dot"></span><span class="lbl">💸 신규무료쿠폰</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-coupon-weekly"><span class="dot"></span><span class="lbl">💸 주간플레이쿠폰</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-coupon-double"><span class="dot"></span><span class="lbl">💸 입금더블업쿠폰</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-coupon-daily"><span class="dot"></span><span class="lbl">💸 일일플레이쿠폰</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-coupon-host"><span class="dot"></span><span class="lbl">💸 담당HOST쿠폰</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-coupon-surprise"><span class="dot"></span><span class="lbl">💸 돌발쿠폰 OFF</span><span class="pill"></span></button>
+        </div>
+      </div>
+      <div class="group">
+        <button class="group-hd" data-flash data-ripple>
+          <span class="ttl">프로모션</span><span class="chev">›</span>
+        </button>
+        <div class="group-body">
+          <button class="item" data-flash data-ripple data-target="sec-promo-official"><span class="dot"></span><span class="lbl">공식프로모션</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-promo-partner"><span class="dot"></span><span class="lbl">파트너프로모션</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-promo-now"><span class="dot"></span><span class="lbl">지금진행중</span><span class="pill"></span></button>
+          <button class="item" data-flash data-ripple data-target="sec-promo-join"><span class="dot"></span><span class="lbl">프로모션참여하기</span><span class="pill"></span></button>
+        </div>
+      </div>
+    </aside>
 
-  <!-- 상단 툴바 -->
-  <nav class="toolbar" style="display:flex;align-items:center;gap:12px;padding:12px var(--side);">
-    <button id="careToggle" class="btn-care">케어</button>
-    <span class="hint" style="opacity:.6;font-size:14px">케어 클릭 시 히어로 1·2·3 펼침/접힘 (상태 저장)</span>
-  </nav>
+    <!-- Center -->
+    <section class="panel center" id="centerPanel">
+      <div class="hero-row" id="heroRow">
+        <div class="hero-grid" id="heroGrid">
+          <a class="hero-card" data-flash data-ripple><div class="img" style="background-image:url('assets/hero_left.png')" aria-label="HERO 1"></div></a>
+          <a class="hero-card" data-flash data-ripple><div class="img" style="background-image:url('assets/hero_center.png')" aria-label="HERO 2"></div></a>
+          <a class="hero-card" data-flash data-ripple><div class="img" style="background-image:url('assets/hero_right.png')" aria-label="HERO 3"></div></a>
+        </div>
+      </div>
+      <div class="content">
+        <section id="sec-partner-service" class="content-section active">
+          <h2>파트너서비스</h2>
+          <p>Independent Host 등록 미들급 파트너들이 준비한 온라인 서비스. 게임 중 이슈 처리, 최신 정보 전달, 멘탈 웰니스 체크까지 폭넓게 지원합니다.</p>
+          <p class="note">※ 실제 라이선스 보유 파트너 중심 운영. 운영 환경상 배정 방식이 호텔/카지노와 다를 수 있습니다.</p>
+        </section>
+        <section id="sec-benefits" class="content-section">
+          <h2>등급별 혜택</h2>
+          <ul>
+            <li>1~2 Regular/Casual: 기본 회원(서비스 제외 구간)</li>
+            <li>3~4 Silver/Standard: 일부 기본 서비스 (골드 등장 시 제외 가능)</li>
+            <li>5~6 Gold/Premium: 담당 배정 기준 시작</li>
+            <li>7~8 Platinum/Elite: 식사·스파 등 무료 예약 지원</li>
+            <li>9~10 Signature/Royal: 실소유 멤버십 확인 후 전용 프로그램</li>
+          </ul>
+        </section>
+        <section id="sec-coupon-apply" class="content-section">
+          <h2>쿠폰신청방법</h2>
+          <p>등급별 혜택을 먼저 확인하고, 본인 등급에 맞는 쿠폰을 선택해 신청하세요. 선호도 체크를 완료하시면 신규쿠폰 대상에 포함될 수 있습니다.</p>
+        </section>
+        <section id="sec-preference" class="content-section">
+          <h2>선호도체크</h2>
+          <p>입금 전 무등급 고객을 위한 체크. 정확히 기재해주시면 신규 선호도와 퀴즈점수를 합하여 쿠폰금액이 상이하게 지급되니 즐겁게 퀴즈푸시고 쿠폰도 받아가세요.</p>
+        </section>
+        <section id="sec-coupon-new" class="content-section"><h2>신규무료쿠폰</h2><p>선호도체크 완료 고객 대상. 롤링만 채우면 환전 가능한 쿠폰입니다.</p></section>
+        <section id="sec-coupon-weekly" class="content-section"><h2>주간플레이쿠폰</h2><p>1~2등급 고객도 주 1회 이용 가능합니다.</p></section>
+        <section id="sec-coupon-double" class="content-section"><h2>입금더블업쿠폰</h2><p>3등급 이상으로 정상 플레이가 확인된 고객 대상.</p></section>
+        <section id="sec-coupon-daily" class="content-section"><h2>일일플레이쿠폰</h2><p>4등급 이상 데일리급 플레이 고객 대상.</p></section>
+        <section id="sec-coupon-host" class="content-section"><h2>담당HOST쿠폰</h2><p>담당 호스트 배정 고객 대상 특별 쿠폰.</p></section>
+        <section id="sec-coupon-surprise" class="content-section"><h2>돌발쿠폰 OFF</h2><p>하루 1회(3시~23시) 무작위 3~23만원 보너스. 참여자 수에 따라 추가 보너스 적용.</p></section>
+        <section id="sec-promo-official" class="content-section" data-promo="official">
+          <h2>공식프로모션</h2>
+          <p class="note">이미지 1장 + 간단 설명을 등록하면 아래에 순서대로 쌓입니다.</p>
+          <div class="promo-uploader">
+            <input type="file" accept="image/*" class="promo-file" multiple>
+            <textarea class="promo-desc" rows="2" placeholder="간략 설명"></textarea>
+            <button class="promo-add-btn" data-flash data-ripple>추가</button>
+          </div>
+          <div class="promo-list"></div>
+        </section>
+        <section id="sec-promo-partner" class="content-section" data-promo="partner">
+          <h2>파트너프로모션</h2>
+          <p class="note">이미지 1장 + 간단 설명을 등록하면 아래에 순서대로 쌓입니다.</p>
+          <div class="promo-uploader">
+            <input type="file" accept="image/*" class="promo-file" multiple>
+            <textarea class="promo-desc" rows="2" placeholder="간략 설명"></textarea>
+            <button class="promo-add-btn" data-flash data-ripple>추가</button>
+          </div>
+          <div class="promo-list"></div>
+        </section>
+        <section id="sec-promo-now" class="content-section"><h2>지금진행중</h2><p>현재 진행 중인 이벤트/프로모션 목록.</p></section>
+        <section id="sec-promo-join" class="content-section"><h2>프로모션참여하기</h2><p>참여 절차 및 유의사항을 확인하고 바로 참여하세요.</p></section>
+        <section id="sec-contact" class="content-section"><h2>문의하기</h2><p>서비스/쿠폰/등급 관련 문의 접수.</p></section>
+        <section id="sec-inquiry" class="content-section"><h2>문의</h2><p>자주 묻는 질문 및 빠른 답변.</p></section>
+        <section id="sec-partner-greeting" class="content-section"><h2>파트너인사</h2><p>파트너 소개 및 인사말.</p></section>
+        <section id="sec-quiz-coupon" class="content-section"><h2>퀴즈풀고쿠폰받기</h2><p>퀴즈 참여 시 제공되는 쿠폰 안내.</p></section>
+      </div>
+    </section>
+  </main>
+</div>
 
-  <!-- 히어로 1·2·3 -->
-  <section id="heroWrap" style="padding:0 var(--side);">
-    <div class="hero">
-      <div class="hero-inner">Hero 1</div>
-    </div>
-    <div class="hero">
-      <div class="hero-inner">Hero 2</div>
-    </div>
-    <div class="hero">
-      <div class="hero-inner">Hero 3</div>
-    </div>
-  </section>
-
-  <!-- 카드 섹션 -->
-  <section id="cardSection" class="cards">
-    <div class="card tall yellow-box">
-      <h3>퀴즈만점! 쿠폰만점!</h3>
-      <!-- 확장자 자동 감지 (.png → .jpg → .jpeg → .webp) -->
-      <img class="auto-ext" data-src-base="/assets/promo/quiz-coupon" alt="퀴즈만점! 쿠폰만점!">
-    </div>
-
-    <div class="card">
-      <div class="card-inner">공식 프로모션</div>
-    </div>
-    <div class="card">
-      <div class="card-inner">파트너 프로모션</div>
-    </div>
-    <div class="card">
-      <div class="card-inner">지금 진행중</div>
-    </div>
-    <div class="card">
-      <div class="card-inner">프로모션 참여</div>
-    </div>
-  </section>
-
-  <!-- 스크립트 -->
-  <script src="/js/main.js"></script>
+<script>
+  const careBtn   = document.getElementById('careBtn');
+  const centerEl  = document.getElementById('centerPanel');
+  const heroRow   = document.getElementById('heroRow');
+  function getHeroGrid(){ return document.getElementById('heroGrid'); }
+  function setHeroOpenHeight(){
+    const grid = getHeroGrid(); if(!grid) return 0;
+    const card = grid.querySelector('.hero-card'); if(!card) return 0;
+    const w = card.getBoundingClientRect().width;
+    const h = w * (46/86);
+    document.documentElement.style.setProperty('--hero-open-h', h + 'px');
+    return h;
+  }
+  function sec(str){ const m = /([\d.]+)s/.exec((str||'').trim()); return m ? parseFloat(m[1]) : 0.72; }
+  window.addEventListener('resize', () => {
+    if (centerEl.classList.contains('open')) {
+      const h = setHeroOpenHeight(); heroRow.style.height = h + 'px';
+    }
+  });
+  careBtn.addEventListener('click', () => {
+    const grid = getHeroGrid(); if(!grid) return;
+    const willOpen = !centerEl.classList.contains('open');
+    const h = setHeroOpenHeight();
+    const rs = getComputedStyle(document.documentElement);
+    const baseDur = sec(rs.getPropertyValue('--care-speed') || '0.72s');
+    const seq70   = baseDur * 0.7;
+    const cards = grid.querySelectorAll('.hero-card');
+    cards.forEach((card) => { card.style.transitionDelay = '0s'; card.style.transitionDuration = `${baseDur}s`; });
+    if (willOpen) {
+      cards.forEach((card, i) => { card.style.transitionDelay = `${seq70 * i}s`; card.style.transitionDuration = `${baseDur}s`; });
+      void heroRow.offsetHeight; centerEl.classList.add('open'); heroRow.style.height = h + 'px';
+    } else {
+      const slow = baseDur * 2;
+      cards.forEach((card) => { card.style.transitionDelay = '0s'; card.style.transitionDuration = `${slow}s`; });
+      void heroRow.offsetHeight; centerEl.classList.remove('open'); heroRow.style.height = '0px';
+    }
+  });
+  /* Flash */
+  let blinkTimer=null, blinkTarget=null;
+  function stopBlink(){ if(blinkTimer){clearTimeout(blinkTimer); blinkTimer=null;} if(blinkTarget){blinkTarget.classList.remove('flash-blink'); blinkTarget=null;} }
+  function beginBlink(el){ stopBlink(); blinkTarget = el; el.classList.add('flash-blink'); blinkTimer = setTimeout(stopBlink, 3000);
+    const cancel = ()=>{ stopBlink(); ['pointerdown','keydown','wheel','touchstart','scroll'].forEach(ev=>document.removeEventListener(ev,cancel,true)); };
+    ['pointerdown','keydown','wheel','touchstart','scroll'].forEach(ev=>document.addEventListener(ev,cancel,{once:true, capture:true}));
+  }
+  function flashBorder(el){ if(!el) return; el.classList.remove('flash-border'); void el.offsetWidth; el.classList.add('flash-border'); el.addEventListener('animationend', ()=>{ el.classList.remove('flash-border'); beginBlink(el); }, {once:true}); }
+  document.addEventListener('mousedown', (e)=>{ const t = e.target.closest('[data-flash]'); if(!t) return; flashBorder(t); });
+  /* Ripple */
+  function ripple(e, el){ const r = el.getBoundingClientRect(); const span = document.createElement('span'); span.className = 'wave';
+    span.style.left = (e.clientX - r.left) + 'px'; span.style.top  = (e.clientY - r.top) + 'px'; el.appendChild(span);
+    span.addEventListener('animationend', ()=> span.remove(), {once:true}); }
+  document.addEventListener('mousedown', (e)=>{ const t = e.target.closest('[data-ripple]'); if(!t) return; ripple(e, t); });
+  /* Left Category SPA */
+  const leftNav = document.getElementById('leftNav');
+  function showSection(id){ document.querySelectorAll('.content-section').forEach(s=> s.classList.remove('active')); const target = document.getElementById(id); if(target){ target.classList.add('active'); } }
+  leftNav.addEventListener('click', (e)=>{
+    const hd = e.target.closest('.group-hd'); if(hd){ const group = hd.closest('.group'); const isOpen = group.classList.contains('open');
+      leftNav.querySelectorAll('.group').forEach(g=> g.classList.remove('open')); if(!isOpen) group.classList.add('open'); return; }
+    const it = e.target.closest('.item'); if(it){ it.closest('.group-body').querySelectorAll('.item').forEach(b=> b.classList.remove('active')); it.classList.add('active'); const tgt = it.dataset.target; if(tgt){ showSection(tgt); } }
+  });
+  showSection('sec-partner-service');
+  /* Promo uploader */
+  function setupPromo(sectionId, storageKey){
+    const sec = document.getElementById(sectionId); if(!sec) return;
+    const fileEl = sec.querySelector('.promo-file'); const descEl = sec.querySelector('.promo-desc'); const addBtn = sec.querySelector('.promo-add-btn'); const listEl = sec.querySelector('.promo-list');
+    let items = []; try { items = JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch(e){ items = []; }
+    function render(){ listEl.innerHTML = items.map((it,idx)=>{ return `<div class="promo-item" data-idx="${idx}"><div class="thumb"><img alt="promo" src="${it.src}"></div><div><div class="desc">${(it.desc||'').replace(/</g,'&lt;')}</div><div class="meta">${new Date(it.ts).toLocaleString()}</div></div></div>` }).join(''); }
+    render();
+    function addOne(file, desc){ const reader = new FileReader(); reader.onload = () => { items.push({src: reader.result, desc: desc||'', ts: Date.now()}); localStorage.setItem(storageKey, JSON.stringify(items)); render(); }; reader.readAsDataURL(file); }
+    addBtn?.addEventListener('click', ()=>{ const files = fileEl?.files; const desc  = (descEl?.value||'').trim(); if(!files || files.length===0){ alert('이미지를 선택해주세요.'); return; }
+      [...files].forEach(f=> addOne(f, desc)); if(fileEl) fileEl.value = ''; if(descEl) descEl.value = ''; });
+  }
+  setupPromo('sec-promo-official','promo_official_items');
+  setupPromo('sec-promo-partner','promo_partner_items');
+  /* Admin gate */
+  (function(){
+    const ADMIN_PASS = '133';
+    function setAdmin(on){ document.body.classList.toggle('admin', !!on); localStorage.setItem('w2_admin', on?'1':'0'); }
+    function initAdmin(){ const url = new URL(location.href); if(url.searchParams.get('admin')==='1'){ setAdmin(true); return; } if(localStorage.getItem('w2_admin')==='1'){ setAdmin(true); } }
+    document.addEventListener('keydown', (e)=>{ const k = e.key?.toLowerCase?.();
+      if(e.altKey && e.shiftKey && k==='a'){ const v = prompt('관리자 코드 입력'); if(v===ADMIN_PASS){ setAdmin(true); alert('관리자 모드 활성화'); } else{ alert('코드가 올바르지 않습니다.'); } }
+      if(e.altKey && e.shiftKey && k==='x'){ setAdmin(false); alert('관리자 모드 해제'); }
+    });
+    initAdmin();
+  })();
+</script>
 </body>
 </html>
