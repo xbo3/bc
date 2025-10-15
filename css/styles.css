@@ -55,3 +55,35 @@
 }
 
 /* 끝에 섞여 있던 'dlfjgrp' 같은 문자열 절대 금지 */
+
+/* 모바일에서 사이드 폭 자동 축소 + 1열 스택 전환 */
+@media (max-width: 900px) {
+  /* 사이드 고정폭을 자동 축소(clamp) */
+  :root { --aside-w: clamp(0px, 32vw, 240px); }  /* 사용 중이면 즉시 효과, 없어도 무해 */
+
+  /* 흔한 3열 컨테이너들을 1열로 강제 */
+  :where(.layout, .grid, .grid3, .grid-3, .cols, .page-grid) {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: var(--gap, 16px);
+  }
+  :where(.layout, .grid, .grid3, .grid-3, .cols, .page-grid) > * {
+    grid-column: 1 / -1 !important;
+    width: auto !important;
+    min-width: 0 !important;  /* 가운데 칼럼이 0으로 눌리는 현상 방지 */
+  }
+
+  /* 히어로가 접혀 있어 빈칸처럼 보이는 것 방지(모바일 기본 펼침) */
+  #heroWrap { max-height: 2600px !important; }
+}
+
+/* 절대배치 배경이 부모 기준으로 깔리도록 안전장치(이미 추가했어도 무해) */
+.socket, #heroWrap .hero { position: relative; }
+.socket .bg, #heroWrap .hero .bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  display: block;
+}
+
+/* grid 아이템이 가로로 밀려 1fr이 0이 되는 현상 공통 보정 */
+:where(.layout, .grid, .grid3, .grid-3, .cols, .page-grid) > * { min-width: 0; }
